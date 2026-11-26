@@ -23,7 +23,7 @@ import {
   Trophy,
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { HABIT_COLORS, MOOD_ORDER, MOODS, PRIORITIES } from '../data/mockData'
+import { HABIT_COLORS, MOOD_ORDER, MOODS } from '../data/mockData'
 import {
   cn,
   formatShortDate,
@@ -116,6 +116,20 @@ function HabitTooltip({ active, payload, isDark }) {
   )
 }
 
+function ChartEmpty({ icon: Icon, title, description }) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/40 px-6 text-center dark:border-slate-800 dark:bg-slate-900/40">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
+        <Icon className="h-4 w-4" />
+      </span>
+      <p className="mt-2.5 text-xs font-bold text-slate-700 dark:text-slate-200">{title}</p>
+      <p className="mt-1 max-w-[240px] text-[10px] leading-relaxed text-slate-400 dark:text-slate-500">
+        {description}
+      </p>
+    </div>
+  )
+}
+
 export default function Stats() {
   const { entries, tasks, habits, preferences } = useApp()
   const isDark = preferences.theme === 'dark'
@@ -141,7 +155,6 @@ export default function Stats() {
 
     const completedTasks = tasks.filter((task) => task.completed).length
     const taskPercent = percentage(completedTasks, tasks.length)
-    const overweight = tasks.filter((task) => !task.completed && PRIORITIES[task.priority]).length
 
     const habitDaily = days.map((day) => {
       const key = toDateKey(day)
@@ -172,7 +185,6 @@ export default function Stats() {
       completedTasks,
       taskPercent,
       activeTasks: tasks.length - completedTasks,
-      overweight,
       habitDaily,
       habitChecks,
       habitTarget,
@@ -257,50 +269,58 @@ export default function Stats() {
             }
           />
           <div className="mt-4 h-[250px] w-full sm:h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.moodData} margin={{ top: 12, right: 10, left: -24, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="moodLine" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor={accent} stopOpacity={0.65} />
-                    <stop offset="100%" stopColor={accent} stopOpacity={1} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 6" stroke={gridColor} vertical={false} />
-                <XAxis
-                  dataKey="day"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: axisColor, fontSize: 10, fontWeight: 600 }}
-                  dy={8}
-                />
-                <YAxis
-                  domain={[0.5, 5.5]}
-                  ticks={[1, 2, 3, 4, 5]}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: axisColor, fontSize: 10 }}
-                  width={42}
-                />
-                <Tooltip
-                  content={<MoodTooltip isDark={isDark} />}
-                  cursor={{ stroke: accent, strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.35 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="url(#moodLine)"
-                  strokeWidth={2.5}
-                  connectNulls
-                  dot={{
-                    r: 4,
-                    fill: isDark ? '#0f172a' : '#ffffff',
-                    stroke: accent,
-                    strokeWidth: 2,
-                  }}
-                  activeDot={{ r: 6, fill: accent, stroke: isDark ? '#0f172a' : '#ffffff', strokeWidth: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {stats.moodData.some((item) => item.score !== null) ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.moodData} margin={{ top: 12, right: 10, left: -24, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="moodLine" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor={accent} stopOpacity={0.65} />
+                      <stop offset="100%" stopColor={accent} stopOpacity={1} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="4 6" stroke={gridColor} vertical={false} />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: axisColor, fontSize: 10, fontWeight: 600 }}
+                    dy={8}
+                  />
+                  <YAxis
+                    domain={[0.5, 5.5]}
+                    ticks={[1, 2, 3, 4, 5]}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: axisColor, fontSize: 10 }}
+                    width={42}
+                  />
+                  <Tooltip
+                    content={<MoodTooltip isDark={isDark} />}
+                    cursor={{ stroke: accent, strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.35 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="url(#moodLine)"
+                    strokeWidth={2.5}
+                    connectNulls
+                    dot={{
+                      r: 4,
+                      fill: isDark ? '#0f172a' : '#ffffff',
+                      stroke: accent,
+                      strokeWidth: 2,
+                    }}
+                    activeDot={{ r: 6, fill: accent, stroke: isDark ? '#0f172a' : '#ffffff', strokeWidth: 3 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <ChartEmpty
+                icon={Smile}
+                title="Belum ada mood minggu ini"
+                description="Tulis satu entri jurnal agar grafik mood mulai terisi."
+              />
+            )}
           </div>
           <div className="mt-1 flex items-center justify-between border-t border-slate-100 pt-3.5 dark:border-slate-800">
             <p className="text-[10px] text-slate-400 dark:text-slate-500">
@@ -320,32 +340,42 @@ export default function Stats() {
             description="Semua tugas yang tercatat."
           />
           <div className="relative mx-auto mt-2 h-[210px] w-full max-w-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={taskChart}
-                  dataKey="value"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={64}
-                  outerRadius={86}
-                  paddingAngle={3}
-                  startAngle={90}
-                  endAngle={-270}
-                  stroke="none"
-                >
-                  {taskChart.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <p className="text-[28px] font-extrabold leading-none tracking-tight text-slate-900 dark:text-white">
-                {stats.taskPercent}%
-              </p>
-              <p className="mt-1 text-[10px] font-semibold text-slate-400">selesai</p>
-            </div>
+            {tasks.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={taskChart}
+                      dataKey="value"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={64}
+                      outerRadius={86}
+                      paddingAngle={3}
+                      startAngle={90}
+                      endAngle={-270}
+                      stroke="none"
+                    >
+                      {taskChart.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-[28px] font-extrabold leading-none tracking-tight text-slate-900 dark:text-white">
+                    {stats.taskPercent}%
+                  </p>
+                  <p className="mt-1 text-[10px] font-semibold text-slate-400">selesai</p>
+                </div>
+              </>
+            ) : (
+              <ChartEmpty
+                icon={CheckCircle2}
+                title="Belum ada tugas tercatat"
+                description="Tambahkan tugas pertamamu untuk melihat persentase penyelesaian."
+              />
+            )}
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <div className="rounded-xl bg-emerald-500/[0.07] px-3 py-2.5">
@@ -382,38 +412,46 @@ export default function Stats() {
             }
           />
           <div className="mt-4 h-[240px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.habitDaily} margin={{ top: 10, right: 8, left: -26, bottom: 0 }} barCategoryGap="28%">
-                <defs>
-                  <linearGradient id="habitBars" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={accent} stopOpacity={0.95} />
-                    <stop offset="100%" stopColor={accent} stopOpacity={0.55} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="4 6" stroke={gridColor} vertical={false} />
-                <XAxis
-                  dataKey="day"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: axisColor, fontSize: 10, fontWeight: 600 }}
-                  dy={8}
-                />
-                <YAxis
-                  domain={[0, 100]}
-                  ticks={[0, 50, 100]}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: axisColor, fontSize: 9 }}
-                  width={44}
-                  tickFormatter={(value) => `${value}%`}
-                />
-                <Tooltip
-                  content={<HabitTooltip isDark={isDark} />}
-                  cursor={{ fill: isDark ? 'rgba(148,163,184,0.06)' : 'rgba(15,23,42,0.03)', radius: 8 }}
-                />
-                <Bar dataKey="percent" fill="url(#habitBars)" radius={[7, 7, 3, 3]} maxBarSize={44} />
-              </BarChart>
-            </ResponsiveContainer>
+            {habits.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.habitDaily} margin={{ top: 10, right: 8, left: -26, bottom: 0 }} barCategoryGap="28%">
+                  <defs>
+                    <linearGradient id="habitBars" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={accent} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={accent} stopOpacity={0.55} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="4 6" stroke={gridColor} vertical={false} />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: axisColor, fontSize: 10, fontWeight: 600 }}
+                    dy={8}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    ticks={[0, 50, 100]}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: axisColor, fontSize: 9 }}
+                    width={44}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip
+                    content={<HabitTooltip isDark={isDark} />}
+                    cursor={{ fill: isDark ? 'rgba(148,163,184,0.06)' : 'rgba(15,23,42,0.03)', radius: 8 }}
+                  />
+                  <Bar dataKey="percent" fill="url(#habitBars)" radius={[7, 7, 3, 3]} maxBarSize={44} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <ChartEmpty
+                icon={BarChart3}
+                title="Belum ada habit untuk diukur"
+                description="Buat satu kebiasaan kecil agar konsistensinya bisa kamu lihat di sini."
+              />
+            )}
           </div>
           <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-3.5 dark:border-slate-800">
             <p className="text-[10px] text-slate-400 dark:text-slate-500">

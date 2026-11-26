@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { CheckCircle2, Flame, Leaf, Plus, Sparkles, TrendingUp } from 'lucide-react'
+import { Flame, Leaf, Plus, Sparkles, TrendingUp } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import {
   cn,
