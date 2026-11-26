@@ -38,6 +38,13 @@ npm run build
 npm run preview
 ```
 
+## Akun demo
+
+- Email: `umar@daylipro.id`
+- Kata sandi: `daylipro`
+
+Centang **Ingat saya** agar sesi tetap aktif saat tab dimuat ulang. Jika tidak dicentang, sesi hanya bertahan sampai halaman dimuat ulang.
+
 ## Struktur
 
 ```

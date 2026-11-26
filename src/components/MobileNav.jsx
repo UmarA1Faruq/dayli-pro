@@ -31,7 +31,7 @@ export default function MobileNav() {
     <>
       <nav
         aria-label="Navigasi mobile"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/92 lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-white/[0.92] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/[0.92] lg:hidden"
       >
         <div className="mx-auto grid h-[62px] max-w-lg grid-cols-5 items-stretch px-1">
           {MOBILE_ITEMS.map((item) => {
@@ -41,6 +41,7 @@ export default function MobileNav() {
               <Link
                 key={item.path}
                 to={item.path}
+                aria-current={active ? 'page' : undefined}
                 className={cn(
                   'relative flex flex-col items-center justify-center gap-1 text-[9px] font-semibold transition',
                   active ? 'text-accent' : 'text-slate-400 dark:text-slate-500',
@@ -85,7 +86,12 @@ export default function MobileNav() {
       </nav>
 
       {moreOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu lainnya"
+          className="fixed inset-0 z-[60] lg:hidden"
+        >
           <button
             type="button"
             aria-label="Tutup menu"
@@ -117,6 +123,7 @@ export default function MobileNav() {
                     key={item.path}
                     to={item.path}
                     onClick={() => setMoreOpen(false)}
+                    aria-current={active ? 'page' : undefined}
                     className={cn(
                       'flex items-center gap-3 rounded-2xl border p-3 transition',
                       active
