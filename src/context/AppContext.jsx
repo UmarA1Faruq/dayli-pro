@@ -15,7 +15,7 @@ import {
   initialTasks,
   initialUser,
 } from '../data/mockData'
-import { toDateKey, uid } from '../utils/helpers'
+import { formatShortDate, isDateKeyToday, toDateKey, uid } from '../utils/helpers'
 
 const AppContext = createContext(null)
 
@@ -91,7 +91,7 @@ export function AppProvider({ children }) {
   )
 
   const login = useCallback(
-    (email, password) => {
+    (email, password, remember = true) => {
       const isValidEmail = email.trim().toLowerCase() === user.email.toLowerCase()
       const isValidPassword = password === 'daylipro'
       if (!isValidEmail || !isValidPassword) {
@@ -104,7 +104,11 @@ export function AppProvider({ children }) {
       }
       setIsAuthenticated(true)
       try {
-        sessionStorage.setItem('dayli-auth', '1')
+        if (remember) {
+          sessionStorage.setItem('dayli-auth', '1')
+        } else {
+          sessionStorage.removeItem('dayli-auth')
+        }
       } catch {
         // Session only lives in memory when storage is unavailable.
       }
@@ -282,11 +286,12 @@ export function AppProvider({ children }) {
           return { ...item, history }
         }),
       )
+      const when = isDateKeyToday(date) ? 'hari ini' : formatShortDate(date)
       notify(
         hasDate ? 'Centang dibatalkan' : 'Kebiasaan selesai!',
         hasDate
-          ? `“${habit.name}” untuk hari ini dibatalkan.`
-          : `“${habit.name}” berhasil dicatat. Pertahankan ritmenya!`,
+          ? `“${habit.name}” untuk ${when} dibatalkan.`
+          : `“${habit.name}” untuk ${when} berhasil dicatat. Pertahankan ritmenya!`,
         hasDate ? 'info' : 'success',
       )
     },
@@ -355,7 +360,7 @@ export function AppProvider({ children }) {
       document.body.appendChild(anchor)
       anchor.click()
       anchor.remove()
-      URL.revokeObjectURL(url)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
       notify('Data berhasil diekspor', 'File JSON berisi seluruh data demo telah diunduh.', 'success')
     } catch {
       notify('Export siap', 'Data demo berhasil disiapkan (mode simulasi).', 'info')

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import Logo, { LogoMark } from '../components/Logo'
-import { cn } from '../utils/helpers'
+import { cn, formatFullDate } from '../utils/helpers'
 
 const previewTasks = [
   { label: 'Review proposal klien', done: false },
@@ -45,7 +45,7 @@ export default function Login() {
     }
     setLoading(true)
     setTimeout(() => {
-      const success = login(email, password)
+      const success = login(email, password, remember)
       setLoading(false)
       if (success) {
         navigate('/dashboard', { replace: true })
@@ -110,7 +110,7 @@ export default function Login() {
                   <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/45">
                     Hari ini
                   </p>
-                  <p className="mt-1 text-sm font-bold text-white">Senin, 23 November</p>
+                  <p className="mt-1 text-sm font-bold text-white">{formatFullDate()}</p>
                 </div>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-bold text-emerald-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -258,12 +258,14 @@ export default function Login() {
             </div>
 
             <div className="flex items-center justify-between gap-3">
-              <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                <button
-                  type="button"
-                  role="checkbox"
-                  aria-checked={remember}
-                  onClick={() => setRemember((current) => !current)}
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={remember}
+                onClick={() => setRemember((current) => !current)}
+                className="flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                <span
                   className={cn(
                     'flex h-[18px] w-[18px] items-center justify-center rounded-[5px] border transition',
                     remember
@@ -272,9 +274,9 @@ export default function Login() {
                   )}
                 >
                   {remember && <Check className="h-3 w-3" strokeWidth={3} />}
-                </button>
+                </span>
                 Ingat saya
-              </label>
+              </button>
               <button
                 type="button"
                 onClick={() =>
