@@ -43,7 +43,7 @@ npm run preview
 - Email: `umar@daylipro.id`
 - Kata sandi: `daylipro`
 
-Centang **Ingat saya** agar sesi tetap aktif saat tab dimuat ulang. Jika tidak dicentang, sesi hanya bertahan sampai tab ditutup.
+Centang **Ingat saya** agar sesi tetap aktif saat tab dimuat ulang. Jika tidak dicentang, sesi hanya bertahan sampai halaman dimuat ulang.
 
 ## Struktur
 
